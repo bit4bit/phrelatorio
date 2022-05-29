@@ -1,0 +1,24 @@
+{
+    "name": "bit4bit/phrelatorio",
+    "type": "library",
+    "require-dev": {
+        "phpunit/phpunit": "^9.5"
+    },
+    "license": "MIT",
+    "autoload": {
+        "psr-4": {
+            "Phrelatorio\\": "src/"
+        }
+    },
+    "authors": [
+        {
+            "name": "Jovany Leandro G.C",
+            "email": "bit4bit@riseup.net"
+        }
+    ],
+    "minimum-stability": "dev",
+    "require": {
+        "josemmo/uxml": "dev-main",
+        "phptal/phptal": "dev-master"
+    }
+}
