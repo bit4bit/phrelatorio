@@ -12,3 +12,8 @@ $doc = Phrelatorio::loadXML('myods.fods');
 $doc->saveXML('mynewods.fods', ...context...);
 
 ~~~
+
+
+# Inspired by
+
+* [relatorio](https://hg.tryton.org/relatorio/file/tip/README)
