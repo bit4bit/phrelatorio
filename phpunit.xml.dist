@@ -1,0 +1,11 @@
+<phpunit
+    bootstrap="vendor/autoload.php"
+    convertErrorsToExceptions="true"
+    convertNoticesToExceptions="true"
+    convertWarningsToExceptions="true">
+  <testsuites>
+    <testsuite name="Phrelatorio">
+      <directory>./tests</directory>
+    </testsuite>
+  </testsuites>
+</phpunit>
