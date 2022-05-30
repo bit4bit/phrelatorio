@@ -1,0 +1,29 @@
+FROM php:7.4-cli
+
+# instalar dependencias so
+RUN apt-get update && apt-get install -y git unzip p7zip iputils-ping libzip-dev
+RUN apt-get install -y libpq-dev libxml2-dev libssl-dev
+
+# instalar dependencias php
+RUN docker-php-ext-install zip
+
+RUN mkdir -p /app && chmod 777 /app
+WORKDIR /app
+
+ENV HOME /app
+
+# instalar docker-composer
+RUN curl -sS https://getcomposer.org/installer | php \
+  && mv composer.phar /usr/local/bin/ \
+  && ln -s /usr/local/bin/composer.phar /usr/local/bin/composer
+ENV PATH="~/.composer/vendor/bin:./vendor/bin:${PATH}"
+
+# instala phpunit
+RUN curl -sS -L https://phar.phpunit.de/phpunit-9.5.phar -o /usr/local/bin/phpunit.phar
+RUN ln -s /usr/local/bin/phpunit.phar /usr/local/bin/phpunit
+RUN chmod a+rx /usr/local/bin/phpunit.phar
+
+# instalar psalm
+RUN curl -sS -L https://github.com/vimeo/psalm/releases/latest/download/psalm.phar -o /usr/local/bin/psalm.phar
+RUN ln -s /usr/local/bin/psalm.phar /usr/local/bin/psalm
+RUN chmod a+rx /usr/local/bin/psalm.phar

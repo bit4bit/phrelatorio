@@ -1,0 +1,18 @@
+# Copyright 2022 Picallex Holding Group. All rights reserved.
+#
+# @author (2022) Jovany Leandro G.C <jovany@picallex.com>
+version: '3.7'
+services:
+  php:
+    user: "${DUID}:${DGID}"
+    build:
+      context: ./
+      dockerfile: Dockerfile.dev
+    command: sleep 10h
+    volumes:
+      - .:/app:rw
+    networks:
+      - operation
+      
+networks:
+  operation:
