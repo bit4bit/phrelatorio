@@ -84,7 +84,6 @@ class OpenDocument
         // argumentos para uso posterior
         $talArguments = [];
         $beginsFor = [];
-        $endsFor = [];
         $blocks = []; # begin => end
         foreach ($elements as $elem) {
             [$talAction, $talArgument] = $this->extractTal($elem);
@@ -93,6 +92,8 @@ class OpenDocument
             }
         }
 
+        // construimos la relacion begin => end,
+        // usando beginsFor como una pila
         foreach ($elements as $elem) {
             [$talAction, $talArgument] = $this->extractTal($elem);
             
@@ -101,26 +102,21 @@ class OpenDocument
             
             switch($talAction) {
             case 'for':
-                $beginsFor[] = $cell;
+                \array_push($beginsFor, $cell);
                 break;
             case '/for':
-                $endsFor[] = $cell;
+                $beginFor = \array_pop($beginsFor);
+                $endFor = $cell;
+                $parentCommon = $this->findParentCommon($beginFor, $endFor);
+                if ($parentCommon === null) {
+                    throw new Exception("can't detect common parent");
+                }
+
+                $blocks[] = [$parentCommon, $beginFor, $endFor];
                 break;
             }
 
             $elem->remove();
-        }
-
-        foreach ($beginsFor as $beginFor) {
-            $endFor = \array_shift($endsFor);
-            do {
-                $parentCommon = $this->findParentCommon($beginFor, $endFor);
-                if ($parentCommon !== null) {
-                    $blocks[] = [$parentCommon, $beginFor, $endFor];
-                    break;
-                }
-                $endFor = \array_shift($endsFor);
-            } while($endFor !== null);
         }
 
         // </a>..<a>
