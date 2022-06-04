@@ -7,7 +7,7 @@ use Phrelatorio;
 
 class PhrelatorioTest extends TestCase
 {
-    public function testForCell(): void
+    public function testForColumn(): void
     {
         $input = <<<XML
 <?xml version="1.0"?>
