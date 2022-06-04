@@ -51,7 +51,6 @@ class OpenDocument
 
         // namespace para PHPTAL
         $this->doc->element()->ownerDocument->createElementNs('http://tal', 'tal');
-        
         $this->talTransform();
     }
 
@@ -86,6 +85,14 @@ class OpenDocument
         $talArguments = [];
         $beginsFor = [];
         $endsFor = [];
+        $blocks = []; # begin => end
+        foreach ($elements as $elem) {
+            [$talAction, $talArgument] = $this->extractTal($elem);
+            if ($talAction == 'content') {
+                $elem->parent()->element()->setAttribute('tal:content', $talArgument);
+            }
+        }
+
         foreach ($elements as $elem) {
             [$talAction, $talArgument] = $this->extractTal($elem);
             
@@ -93,11 +100,6 @@ class OpenDocument
             $talArguments[spl_object_hash($cell)] = $talArgument;
             
             switch($talAction) {
-                
-            case 'content':
-                // a/p/container
-                $elem->parent()->element()->setAttribute('tal:content', $talArgument);
-                break;
             case 'for':
                 $beginsFor[] = $cell;
                 break;
@@ -109,44 +111,30 @@ class OpenDocument
             $elem->remove();
         }
 
-        if (count($beginsFor) != count($endsFor)) {
-            throw new \Exception('every open for must be close with /for');
+        foreach ($beginsFor as $beginFor) {
+            $endFor = \array_shift($endsFor);
+            do {
+                $parentCommon = $this->findParentCommon($beginFor, $endFor);
+                if ($parentCommon !== null) {
+                    $blocks[] = [$parentCommon, $beginFor, $endFor];
+                    break;
+                }
+                $endFor = \array_shift($endsFor);
+            } while($endFor !== null);
         }
 
         // </a>..<a>
-        foreach($endsFor as $endFor) {
-            $beginFor = array_pop($beginsFor);
-
-            // algoritmo extraido de relatorio
-            $parentBeginFor = $beginFor->parent();
-            $parentEndFor = $endFor->parent();
-            $parentCommon = null;
-            
-            $levelsBeforeException = 5;
-            while($levelsBeforeException -= 1 > 0) {
-                // ubicamos el pariente en comun
-                $idParentBegin = spl_object_hash($parentBeginFor);
-                $idParentEnd = spl_object_hash($parentEndFor);
-                if ($idParentBegin == $idParentEnd) {
-                    $parentCommon = $parentBeginFor;
-                    break;
-                }
-
-                $parentBeginFor = $parentBeginFor->parent();
-
-                $parentEndFor = $parentEndFor->parent();
-            }
-            if ($parentCommon === null) {
-                throw new \Exception("fails to found a common ancestor for ${beginFor} and ${endFor}");
-            }
+        foreach($blocks as $match) {
+            [$parentCommon, $beginFor, $endFor] = $match;
 
             // TODO adicionar tag para repetir elementos
             $parentCommonTag = $parentCommon->element()->localName;
             $talArgument = $talArguments[spl_object_hash($beginFor)];
+
             switch($parentCommonTag) {
             case 'table-row':
-                $beginTableRow = $beginFor->get('./ancestor::table:table-row');
-                $phrelatorio = $beginTableRow->add('tal:phrelatorio', '');
+                $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
+                $beginFor->parent()->element()->insertBefore($phrelatorio->element(), $beginFor->element());
                 $phrelatorio->element()->setAttribute('tal:repeat', trim($talArgument,'"'));
                 
                 $this->moveBetweenToNewParent($beginFor, $endFor, $phrelatorio);
@@ -154,8 +142,8 @@ class OpenDocument
                 $endFor->remove();
                 break;
             case 'table':
-                $beginTable = $beginFor->get('./ancestor::table:table');
-                $phrelatorio = $beginTable->add('tal:phrelatorio', '');
+                $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
+                $beginFor->parent()->parent()->element()->insertBefore($phrelatorio->element(), $beginFor->parent()->element());
                 $phrelatorio->element()->setAttribute('tal:repeat', trim($talArgument,'"'));
 
                 $beginTableRow = $beginFor->get('./ancestor::table:table-row');
@@ -197,5 +185,33 @@ class OpenDocument
         $out = (string) $tal->execute();
 
         return $this->sanitazeXML($out);
+    }
+
+    private function objectHash(&$obj): string
+    {
+        return spl_object_hash($obj);
+    }
+
+    private function findParentCommon($beginFor, $endFor) {
+        // algoritmo extraido de relatorio
+        $parentBeginFor = $beginFor->parent();
+        $parentEndFor = $endFor->parent();
+        $parentCommon = null;
+        
+        $levelsBeforeGiveOut = 3;
+        while($levelsBeforeGiveOut -= 1 > 0) {
+            // ubicamos el pariente en comun
+            $idParentBegin = spl_object_hash($parentBeginFor);
+            $idParentEnd = spl_object_hash($parentEndFor);
+            if ($idParentBegin == $idParentEnd) {
+                $parentCommon = $parentBeginFor;
+                break;
+            }
+            
+            $parentBeginFor = $parentBeginFor->parent();
+            $parentEndFor = $parentEndFor->parent();
+        }
+
+        return $parentCommon;
     }
 }
