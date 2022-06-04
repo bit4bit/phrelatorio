@@ -1,6 +1,6 @@
 # phrelatorio
 
-build reports using opendocument editor.
+build reports using opendocument editor (like libreoffice/abiwork/gnumeric).
 
 see **examples** for how to build reports.
 
@@ -12,6 +12,10 @@ $doc = Relatorio::loadXML('myods.fods');
 $doc->saveXML('mynewods.fods', ...context...);
 
 ~~~
+
+# Limitation
+
+- only support Flat OpenDocument
 
 # Todo
 
