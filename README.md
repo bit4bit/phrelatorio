@@ -13,6 +13,12 @@ $doc->saveXML('mynewods.fods', ...context...);
 
 ~~~
 
+# Todo
+
+- [ ] allow php expressions
+- [ ] inject images
+- [ ] work with .odt and .ods
+
 # Thanks
 
 * [PHPTAL](https://phptal.org/)

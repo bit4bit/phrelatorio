@@ -99,7 +99,17 @@ class OpenDocument
             $talArguments[spl_object_hash($cell)] = $talArgument;
 
             if (in_array($talAction, self::PHPTAL_INLINE)) {
-                $elem->parent()->element()->setAttribute("tal:{$talAction}", $talArgument);
+                $inTable = $elem->parent()->parent()->element()->localName == 'table-cell';
+
+                if ($inTable) {
+                    $elem->parent()->element()->setAttribute("tal:{$talAction}", $talArgument);
+                } else {
+                    // invertimos xlink:a/text:a 
+                    $span = $elem->get('./text:span');
+                    $span->element()->setAttribute("tal:{$talAction}", $talArgument);
+                    $elem->parent()->element()->insertBefore($span->element(), $elem->element());
+                }
+
                 $elem->remove();
             } else if (in_array($talAction, self::PHPTAL_ENABLE_BLOCKS)) {
                 if ($talOpened) {
