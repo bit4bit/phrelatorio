@@ -18,6 +18,9 @@ use PHPTAL;
 
 class OpenDocument
 {
+    const PHPTAL_ENABLE_BLOCKS = ['repeat', 'condition'];
+    const PHPTAL_INLINE = ['content'];
+
     private $doc;
 
     public function asXML(array $context): string
@@ -68,13 +71,14 @@ class OpenDocument
 
     private function extractTal($elem) {
         $href = urldecode($elem->element()->getAttribute('xlink:href'));
-        if (preg_match('|phrelatorio://(?<talAction>[^ ]+) *(?<talArgument>.*)?$|', $href, $matchs) != 1) {
+        if (preg_match('|phrelatorio://(?<talOpened>/?)(?<talAction>[^ ]+) *(?<talArgument>.*)?$|', $href, $matchs) != 1) {
             throw new \Exception("invalid href ${href}: {$elem}");
         }
+
         $talAction = $matchs['talAction'];
         $talArgument = @$matchs['talArgument'];
-
-        return [$talAction, $talArgument];
+        $talOpened = @$matchs['talOpened'] != '/';
+        return [$talOpened, $talAction, $talArgument];
     }
     
     private function talTransform()
@@ -85,35 +89,30 @@ class OpenDocument
         $talArguments = [];
         $beginsBlock = [];
         $blocks = []; # begin => end
-        foreach ($elements as $elem) {
-            [$talAction, $talArgument] = $this->extractTal($elem);
-            if ($talAction == 'content') {
-                $elem->parent()->element()->setAttribute('tal:content', $talArgument);
-            }
-        }
 
         // construimos la relacion begin => end,
         // usando beginsBlock como una pila
         foreach ($elements as $elem) {
-            [$talAction, $talArgument] = $this->extractTal($elem);
+            [$talOpened, $talAction, $talArgument] = $this->extractTal($elem);
             
             $cell = $elem->parent()->parent();
             $talArguments[spl_object_hash($cell)] = $talArgument;
-            
-            switch($talAction) {
-            case 'for':
-                \array_push($beginsBlock, $cell);
-                break;
-            case '/for':
-                $beginBlock = \array_pop($beginsBlock);
-                $endBlock = $cell;
-                $parentCommon = $this->findParentCommon($beginBlock, $endBlock);
-                if ($parentCommon === null) {
-                    throw new Exception("can't detect common parent");
-                }
 
-                $blocks[] = [$parentCommon, $beginBlock, $endBlock];
-                break;
+            if (in_array($talAction, self::PHPTAL_INLINE)) {
+                $elem->parent()->element()->setAttribute("tal:{$talAction}", $talArgument);
+                $elem->remove();
+            } else if (in_array($talAction, self::PHPTAL_ENABLE_BLOCKS)) {
+                if ($talOpened) {
+                    \array_push($beginsBlock, $cell);
+                } else {
+                    $beginBlock = \array_pop($beginsBlock);
+                    $endBlock = $cell;
+                    $parentCommon = $this->findParentCommon($beginBlock, $endBlock);
+                    if ($parentCommon === null) {
+                        throw new Exception("can't detect common parent");
+                    }
+                    $blocks[] = [$talAction, $parentCommon, $beginBlock, $endBlock];
+                }
             }
 
             $elem->remove();
@@ -121,8 +120,7 @@ class OpenDocument
 
         // </a>..<a>
         foreach($blocks as $match) {
-            [$parentCommon, $beginBlock, $endBlock] = $match;
-
+            [$talAction, $parentCommon, $beginBlock, $endBlock] = $match;
             // TODO adicionar tag para repetir elementos
             $parentCommonTag = $parentCommon->element()->localName;
             $talArgument = $talArguments[spl_object_hash($beginBlock)];
@@ -130,8 +128,9 @@ class OpenDocument
             switch($parentCommonTag) {
             case 'table-row':
                 $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
+                $phrelatorio->element()->setAttribute("tal:{$talAction}", trim($talArgument,'"'));
+
                 $beginBlock->parent()->element()->insertBefore($phrelatorio->element(), $beginBlock->element());
-                $phrelatorio->element()->setAttribute('tal:repeat', trim($talArgument,'"'));
                 
                 $this->moveBetweenToNewParent($beginBlock, $endBlock, $phrelatorio);
                 $beginBlock->remove();
@@ -139,8 +138,9 @@ class OpenDocument
                 break;
             case 'table':
                 $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
+                $phrelatorio->element()->setAttribute("tal:{$talAction}", trim($talArgument,'"'));
+
                 $beginBlock->parent()->parent()->element()->insertBefore($phrelatorio->element(), $beginBlock->parent()->element());
-                $phrelatorio->element()->setAttribute('tal:repeat', trim($talArgument,'"'));
 
                 $beginTableRow = $beginBlock->get('./ancestor::table:table-row');
                 $endTableRow = $endBlock->get('./ancestor::table:table-row');
@@ -179,7 +179,6 @@ class OpenDocument
         }
 
         $out = (string) $tal->execute();
-
         return $this->sanitazeXML($out);
     }
 

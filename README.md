@@ -1,18 +1,21 @@
 # phrelatorio
 
-build opendocument reports.
+build reports using opendocument editor.
 
 see **examples** for how to build reports.
 
 ~~~php
 
-use Phrelatorio\OpenDocument as Phrelatorio;
+use Phrelatorio\OpenDocument as Relatorio;
 
-$doc = Phrelatorio::loadXML('myods.fods');
+$doc = Relatorio::loadXML('myods.fods');
 $doc->saveXML('mynewods.fods', ...context...);
 
 ~~~
 
+# Thanks
+
+* [PHPTAL](https://phptal.org/)
 
 # Inspired by
 

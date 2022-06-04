@@ -15,13 +15,13 @@ class PhrelatorioTest extends TestCase
 <table:table>
 <table:table-row>
 <table:cell>
-                           <text:p><text:a xlink:href="phrelatorio://for%20%22item%20items%22">for "item items"</text:a></text:p>
+                           <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
 </table:cell>
 <table:cell>
                        <text:p><text:a xlink:href="phrelatorio://content%20item">value</text:a></text:p>
 </table:cell>
 <table:cell>
-                           <text:p><text:a xlink:href="phrelatorio:///for">end</text:a></text:p>
+                           <text:p><text:a xlink:href="phrelatorio:///repeat">end</text:a></text:p>
 </table:cell>
 
 </table:table-row>
@@ -61,7 +61,7 @@ $tml = Phrelatorio\OpenDocument::fromString($input);
 <table:table>
 <table:table-row>
 <table:cell>
-                           <text:p><text:a xlink:href="phrelatorio://for%20%22item%20items%22">for "item items"</text:a></text:p>
+                           <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
 </table:cell>
 </table:table-row>
 <table:table-row>
@@ -71,7 +71,7 @@ $tml = Phrelatorio\OpenDocument::fromString($input);
 </table:table-row>
 <table:table-row>
 <table:cell>
-                           <text:p><text:a xlink:href="phrelatorio:///for">end</text:a></text:p>
+                           <text:p><text:a xlink:href="phrelatorio:///repeat">end</text:a></text:p>
 </table:cell>
 </table:table-row>
 </table:table>
@@ -113,9 +113,9 @@ $tml = Phrelatorio\OpenDocument::fromString($input);
 <?xml version="1.0"?>
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
 <table:table>
-<table:table-row id="row-repeat">
+<table:table-row>
 <table:cell>
-                           <text:p><text:a xlink:href="phrelatorio://for%20%22item%20items%22">for "item items"</text:a></text:p>
+                           <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
 </table:cell>
 </table:table-row>
 <table:table-row>
@@ -125,18 +125,18 @@ $tml = Phrelatorio\OpenDocument::fromString($input);
 </table:table-row>
 <table:table-row>
 <table:cell>
-                           <text:p><text:a xlink:href="phrelatorio:///for">end</text:a></text:p>
+                           <text:p><text:a xlink:href="phrelatorio:///repeat">end</text:a></text:p>
 </table:cell>
 </table:table-row>
-<table:table-row id="column-repeat">
+<table:table-row>
 <table:cell>
-                           <text:p><text:a xlink:href="phrelatorio://for%20%22item%20items%22">for "item items"</text:a></text:p>
+                           <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
 </table:cell>
 <table:cell>
                        <text:p><text:a xlink:href="phrelatorio://content%20item">value</text:a></text:p>
 </table:cell>
 <table:cell>
-                           <text:p><text:a xlink:href="phrelatorio:///for">end</text:a></text:p>
+                           <text:p><text:a xlink:href="phrelatorio:///repeat">end</text:a></text:p>
 </table:cell>
 
 </table:table-row>
@@ -163,7 +163,7 @@ XML;
         <text:p>C</text:p>
       </table:cell>
     </table:table-row>
-    <table:table-row id="column-repeat">
+    <table:table-row>
       <table:cell>
         <text:p>A</text:p>
       </table:cell>
