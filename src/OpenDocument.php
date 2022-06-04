@@ -83,7 +83,7 @@ class OpenDocument
 
         // argumentos para uso posterior
         $talArguments = [];
-        $beginsFor = [];
+        $beginsBlock = [];
         $blocks = []; # begin => end
         foreach ($elements as $elem) {
             [$talAction, $talArgument] = $this->extractTal($elem);
@@ -93,7 +93,7 @@ class OpenDocument
         }
 
         // construimos la relacion begin => end,
-        // usando beginsFor como una pila
+        // usando beginsBlock como una pila
         foreach ($elements as $elem) {
             [$talAction, $talArgument] = $this->extractTal($elem);
             
@@ -102,17 +102,17 @@ class OpenDocument
             
             switch($talAction) {
             case 'for':
-                \array_push($beginsFor, $cell);
+                \array_push($beginsBlock, $cell);
                 break;
             case '/for':
-                $beginFor = \array_pop($beginsFor);
-                $endFor = $cell;
-                $parentCommon = $this->findParentCommon($beginFor, $endFor);
+                $beginBlock = \array_pop($beginsBlock);
+                $endBlock = $cell;
+                $parentCommon = $this->findParentCommon($beginBlock, $endBlock);
                 if ($parentCommon === null) {
                     throw new Exception("can't detect common parent");
                 }
 
-                $blocks[] = [$parentCommon, $beginFor, $endFor];
+                $blocks[] = [$parentCommon, $beginBlock, $endBlock];
                 break;
             }
 
@@ -121,29 +121,29 @@ class OpenDocument
 
         // </a>..<a>
         foreach($blocks as $match) {
-            [$parentCommon, $beginFor, $endFor] = $match;
+            [$parentCommon, $beginBlock, $endBlock] = $match;
 
             // TODO adicionar tag para repetir elementos
             $parentCommonTag = $parentCommon->element()->localName;
-            $talArgument = $talArguments[spl_object_hash($beginFor)];
+            $talArgument = $talArguments[spl_object_hash($beginBlock)];
 
             switch($parentCommonTag) {
             case 'table-row':
                 $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
-                $beginFor->parent()->element()->insertBefore($phrelatorio->element(), $beginFor->element());
+                $beginBlock->parent()->element()->insertBefore($phrelatorio->element(), $beginBlock->element());
                 $phrelatorio->element()->setAttribute('tal:repeat', trim($talArgument,'"'));
                 
-                $this->moveBetweenToNewParent($beginFor, $endFor, $phrelatorio);
-                $beginFor->remove();
-                $endFor->remove();
+                $this->moveBetweenToNewParent($beginBlock, $endBlock, $phrelatorio);
+                $beginBlock->remove();
+                $endBlock->remove();
                 break;
             case 'table':
                 $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
-                $beginFor->parent()->parent()->element()->insertBefore($phrelatorio->element(), $beginFor->parent()->element());
+                $beginBlock->parent()->parent()->element()->insertBefore($phrelatorio->element(), $beginBlock->parent()->element());
                 $phrelatorio->element()->setAttribute('tal:repeat', trim($talArgument,'"'));
 
-                $beginTableRow = $beginFor->get('./ancestor::table:table-row');
-                $endTableRow = $endFor->get('./ancestor::table:table-row');
+                $beginTableRow = $beginBlock->get('./ancestor::table:table-row');
+                $endTableRow = $endBlock->get('./ancestor::table:table-row');
                 $this->moveBetweenToNewParent($beginTableRow, $endTableRow, $phrelatorio);
 
                 $beginTableRow->remove();
