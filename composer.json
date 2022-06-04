@@ -1,5 +1,6 @@
 {
     "name": "bit4bit/phrelatorio",
+    "description": "generate reports using opendocument editor (like libreoffice/abiwork/gnumeric)",
     "type": "library",
     "license": "MIT",
     "autoload": {
