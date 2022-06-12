@@ -117,11 +117,11 @@ class OpenDocument
                 } else {
                     $beginBlock = \array_pop($beginsBlock);
                     $endBlock = $cell;
-                    $parentCommon = $this->findParentCommon($beginBlock, $endBlock);
-                    if ($parentCommon === null) {
+                    $commonAncestor = $this->lowestCommonAncestor($beginBlock, $endBlock);
+                    if ($commonAncestor === null) {
                         throw new \Exception("can't detect common parent");
                     }
-                    $blocks[] = [$talAction, $parentCommon, $beginBlock, $endBlock];
+                    $blocks[] = [$talAction, $commonAncestor, $beginBlock, $endBlock];
                 }
             }
 
@@ -129,9 +129,9 @@ class OpenDocument
         }
 
         foreach($blocks as $match) {
-            [$talAction, $parentCommon, $beginBlock, $endBlock] = $match;
-            $parentCommonTag = $parentCommon->element()->localName;
-            $sectionToRepeat = ['table-row' => 'column', 'table' => 'row', 'spreadsheet' => 'table'][$parentCommonTag];
+            [$talAction, $commonAncestor, $beginBlock, $endBlock] = $match;
+            $commonAncestorTag = $commonAncestor->element()->localName;
+            $sectionToRepeat = ['table-row' => 'column', 'table' => 'row', 'spreadsheet' => 'table'][$commonAncestorTag];
             $talArgument = $talArguments[spl_object_hash($beginBlock)];
 
             switch($sectionToRepeat) {
@@ -167,7 +167,7 @@ class OpenDocument
                 $endWrapBlock->remove();
                 break;
             default:
-                throw new \Exception("not known how to repeat for {$parentCommon}");
+                throw new \Exception("not known how to repeat for {$commonAncestor}");
             }
         }
     }
@@ -212,11 +212,11 @@ class OpenDocument
         return spl_object_hash($obj);
     }
 
-    private function findParentCommon($beginFor, $endFor) {
+    private function lowestCommonAncestor($beginFor, $endFor) {
         // algoritmo extraido de relatorio
         $parentBeginFor = $beginFor->parent();
         $parentEndFor = $endFor->parent();
-        $parentCommon = null;
+        $commonAncestor = null;
         
         $levelsBeforeGiveOut = 4;
         while($levelsBeforeGiveOut -= 1 > 0) {
@@ -224,7 +224,7 @@ class OpenDocument
             $idParentBegin = spl_object_hash($parentBeginFor);
             $idParentEnd = spl_object_hash($parentEndFor);
             if ($idParentBegin == $idParentEnd) {
-                $parentCommon = $parentBeginFor;
+                $commonAncestor = $parentBeginFor;
                 break;
             }
             
@@ -232,6 +232,6 @@ class OpenDocument
             $parentEndFor = $parentEndFor->parent();
         }
 
-        return $parentCommon;
+        return $commonAncestor;
     }
 }
