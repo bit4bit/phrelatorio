@@ -7,22 +7,22 @@ use Phrelatorio;
 
 class PhrelatorioTest extends TestCase
 {
-    public function atestForColumn(): void
+    public function testForColumn(): void
     {
         $input = <<<XML
 <?xml version="1.0"?>
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
 <table:table>
 <table:table-row>
-<table:cell>
+<table:table-cell>
                            <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
-</table:cell>
-<table:cell>
+</table:table-cell>
+<table:table-cell>
                        <text:p><text:a xlink:href="phrelatorio://content%20item">value</text:a></text:p>
-</table:cell>
-<table:cell>
+</table:table-cell>
+<table:table-cell>
                            <text:p><text:a xlink:href="phrelatorio:///repeat">end</text:a></text:p>
-</table:cell>
+</table:table-cell>
 
 </table:table-row>
 </table:table>
@@ -34,15 +34,15 @@ XML;
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
   <table:table>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>A</text:p>
-      </table:cell>
-      <table:cell>
+      </table:table-cell>
+      <table:table-cell>
         <text:p>B</text:p>
-      </table:cell>
-      <table:cell>
+      </table:table-cell>
+      <table:table-cell>
         <text:p>C</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
   </table:table>
 </document>
@@ -53,26 +53,26 @@ $tml = Phrelatorio\OpenDocument::fromString($input);
     $this->assertEquals($wants, $tml->asXML(['items' => ['A', 'B', 'C']]));
     }
 
-    public function atestForRow(): void
+    public function testForRow(): void
     {
         $input = <<<XML
 <?xml version="1.0"?>
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
 <table:table>
 <table:table-row>
-<table:cell>
+<table:table-cell>
                            <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 <table:table-row>
-<table:cell>
+<table:table-cell>
                        <text:p><text:a xlink:href="phrelatorio://content%20item">value</text:a></text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 <table:table-row>
-<table:cell>
+<table:table-cell>
                            <text:p><text:a xlink:href="phrelatorio:///repeat">end</text:a></text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 </table:table>
 </document>
@@ -83,19 +83,19 @@ XML;
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
   <table:table>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>A</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>B</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>C</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
   </table:table>
 </document>
@@ -114,30 +114,30 @@ $tml = Phrelatorio\OpenDocument::fromString($input);
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
 <table:table>
 <table:table-row>
-<table:cell>
+<table:table-cell>
                            <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 <table:table-row>
-<table:cell>
+<table:table-cell>
                        <text:p><text:a xlink:href="phrelatorio://content%20item">value</text:a></text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 <table:table-row>
-<table:cell>
+<table:table-cell>
                            <text:p><text:a xlink:href="phrelatorio:///repeat">end</text:a></text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 <table:table-row>
-<table:cell>
+<table:table-cell>
                            <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
-</table:cell>
-<table:cell>
+</table:table-cell>
+<table:table-cell>
                        <text:p><text:a xlink:href="phrelatorio://content%20item">value</text:a></text:p>
-</table:cell>
-<table:cell>
+</table:table-cell>
+<table:table-cell>
                            <text:p><text:a xlink:href="phrelatorio:///repeat">end</text:a></text:p>
-</table:cell>
+</table:table-cell>
 
 </table:table-row>
 </table:table>
@@ -149,30 +149,30 @@ XML;
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
   <table:table>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>A</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>B</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>C</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>A</text:p>
-      </table:cell>
-      <table:cell>
+      </table:table-cell>
+      <table:table-cell>
         <text:p>B</text:p>
-      </table:cell>
-      <table:cell>
+      </table:table-cell>
+      <table:table-cell>
         <text:p>C</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
   </table:table>
 </document>
@@ -190,24 +190,24 @@ $tml = Phrelatorio\OpenDocument::fromString($input);
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
 <table:table>
 <table:table-row>
-<table:cell>
+<table:table-cell>
     <text:p><text:a xlink:href="phrelatorio://condition%20show">for "item items"</text:a></text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 <table:table-row>
-<table:cell>
+<table:table-cell>
     <text:p>NOT SHOW THIS</text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 <table:table-row>
-<table:cell>
+<table:table-cell>
     <text:p><text:a xlink:href="phrelatorio:///condition">/condition</text:a></text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 <table:table-row>
-<table:cell>
+<table:table-cell>
     <text:p>SHOW THIS</text:p>
-</table:cell>
+</table:table-cell>
 </table:table-row>
 </table:table>
 </document>
@@ -219,9 +219,9 @@ XML;
 <document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
   <table:table>
     <table:table-row>
-      <table:cell>
+      <table:table-cell>
         <text:p>SHOW THIS</text:p>
-      </table:cell>
+      </table:table-cell>
     </table:table-row>
   </table:table>
 </document>

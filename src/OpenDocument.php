@@ -119,7 +119,7 @@ class OpenDocument
                     $endBlock = $cell;
                     $parentCommon = $this->findParentCommon($beginBlock, $endBlock);
                     if ($parentCommon === null) {
-                        throw new Exception("can't detect common parent");
+                        throw new \Exception("can't detect common parent");
                     }
                     $blocks[] = [$talAction, $parentCommon, $beginBlock, $endBlock];
                 }
