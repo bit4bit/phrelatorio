@@ -128,29 +128,24 @@ class OpenDocument
             $elem->remove();
         }
 
-        // </a>..<a>
         foreach($blocks as $match) {
             [$talAction, $parentCommon, $beginBlock, $endBlock] = $match;
-            // TODO adicionar tag para repetir elementos
             $parentCommonTag = $parentCommon->element()->localName;
+            $sectionToRepeat = ['table-row' => 'column', 'table' => 'row', 'spreadsheet' => 'table'][$parentCommonTag];
             $talArgument = $talArguments[spl_object_hash($beginBlock)];
 
-            switch($parentCommonTag) {
-            case 'table-row':
-                $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
-                $phrelatorio->element()->setAttribute("tal:{$talAction}", trim($talArgument,'"'));
-
+            switch($sectionToRepeat) {
+            case 'column':
+                $phrelatorio = $this->newPhrelatorioTag($talAction, $talArgument);
                 $beginBlock->parent()->element()->insertBefore($phrelatorio->element(), $beginBlock->element());
                 
                 $this->moveBetweenToNewParent($beginBlock, $endBlock, $phrelatorio);
                 $beginBlock->remove();
                 $endBlock->remove();
                 break;
-            case 'table':
-                $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
-                $phrelatorio->element()->setAttribute("tal:{$talAction}", trim($talArgument,'"'));
-
-                $beginBlock->parent()->parent()->element()->insertBefore($phrelatorio->element(), $beginBlock->parent()->element());
+            case 'row':
+                $phrelatorio = $this->newPhrelatorioTag($talAction, $talArgument);
+                $beginBlock->get('./ancestor::table:table')->element()->insertBefore($phrelatorio->element(), $beginBlock->get('./ancestor::table:table-row')->element());
 
                 $beginTableRow = $beginBlock->get('./ancestor::table:table-row');
                 $endTableRow = $endBlock->get('./ancestor::table:table-row');
@@ -159,12 +154,31 @@ class OpenDocument
                 $beginTableRow->remove();
                 $endTableRow->remove();
                 break;
+            case 'table':
+                $phrelatorio = $this->newPhrelatorioTag($talAction, $talArgument);
+                // self/table-row/table/spreadsheet
+                $beginBlock->get('./ancestor::office:spreadsheet')->element()->insertBefore($phrelatorio->element(), $beginBlock->get('./ancestor::table:table')->element());
+
+                $beginWrapBlock = $beginBlock->get('./ancestor::table:table');
+                $endWrapBlock = $endBlock->get('./ancestor::table:table');
+                $this->moveBetweenToNewParent($beginWrapBlock, $endWrapBlock, $phrelatorio);
+
+                $beginWrapBlock->remove();
+                $endWrapBlock->remove();
+                break;
             default:
                 throw new \Exception("not known how to repeat for {$parentCommon}");
             }
         }
     }
 
+    private function newPhrelatorioTag($talAction, $talArgument): \UXML\UXML
+    {
+        $phrelatorio = \UXML\UXML::newInstance('tal:phrelatorio', null, [], $this->doc->element()->ownerDocument);
+        $phrelatorio->element()->setAttribute("tal:{$talAction}", trim($talArgument,'"'));
+        return $phrelatorio;
+    }
+    
     private function moveBetweenToNewParent($begin, $end, $parent): void
     {
         $beginDom = $begin->element();
@@ -189,6 +203,7 @@ class OpenDocument
         }
 
         $out = (string) $tal->execute();
+
         return $this->sanitazeXML($out);
     }
 
@@ -203,7 +218,7 @@ class OpenDocument
         $parentEndFor = $endFor->parent();
         $parentCommon = null;
         
-        $levelsBeforeGiveOut = 3;
+        $levelsBeforeGiveOut = 4;
         while($levelsBeforeGiveOut -= 1 > 0) {
             // ubicamos el pariente en comun
             $idParentBegin = spl_object_hash($parentBeginFor);
