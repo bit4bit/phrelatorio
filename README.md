@@ -8,8 +8,8 @@ see **examples** for how to build reports.
 
 use Phrelatorio\OpenDocument as Relatorio;
 
-$doc = Relatorio::loadXML('myods.fods');
-$doc->saveXML('mynewods.fods', ...context...);
+$doc = Relatorio::loadFlatODT('myods.fods');
+$doc->save('mynewods.fods', ...context...);
 
 ~~~
 

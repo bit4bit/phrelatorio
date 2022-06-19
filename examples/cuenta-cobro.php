@@ -2,7 +2,7 @@
 
 require_once __DIR__ . "/../vendor/autoload.php";
 
-$doc = Phrelatorio\OpenDocument::loadXML('cuenta-cobro.fodt');
+$doc = Phrelatorio\OpenDocument::loadFlatODT('cuenta-cobro.fodt');
 $data = [
     'date' => '2022-06-04',
     'subject' => 'ACA PROVEEDOR',
@@ -18,4 +18,4 @@ $data = [
         'C++'
     ]
 ];
-$doc->saveXML('./out_cuenta-cobro.fodt', $data);
+$doc->save('./out_cuenta-cobro.fodt', $data);

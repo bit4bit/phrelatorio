@@ -23,30 +23,25 @@ class OpenDocument
 
     private $doc;
 
-    public function asXML(array $context): string
-    {
-        return $this->execute($context);
-    }
-
-    public function saveXML(string $pathxml, array $context): void
+    public function save(string $pathxml, array $context): void
     {
         $out = $this->execute($context);
         \file_put_contents($pathxml, $out);
     }
     
-    public static function loadXML(string $pathxml): OpenDocument
+    public static function loadFlatODT(string $pathxml): OpenDocument
     {
         $xmlstr = \file_get_contents($pathxml);
         if ($xmlstr === false) {
             throw new \InvalidArgumentException("can't read file {$pathxml}");
         }
 
-        return new self($xmlstr);
+        return new static($xmlstr);
     }
 
-    public static function fromString(string $xmlstr): OpenDocument
+    public static function fromFlatODT(string $xmlstr): OpenDocument
     {
-        return new self($xmlstr);
+        return new static($xmlstr);
     }
 
     public function __construct(string $xmlstr) {
@@ -55,6 +50,11 @@ class OpenDocument
         // namespace para PHPTAL
         $this->doc->element()->ownerDocument->createElementNs('http://tal', 'tal');
         $this->talTransform();
+    }
+
+    protected function asXML(array $context): string
+    {
+        return $this->execute($context);
     }
 
     private function sanitazeXML(string $xml): string
