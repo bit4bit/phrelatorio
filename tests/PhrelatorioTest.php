@@ -2,10 +2,7 @@
 
 namespace PhrelatorioTest;
 
-use PHPUnit\Framework\TestCase;
-use Phrelatorio;
-
-class PhrelatorioTest extends TestCase
+class PhrelatorioTest extends \PHPUnit\Framework\TestCase
 {
     public function testForColumn(): void
     {
@@ -49,8 +46,8 @@ XML;
 
 XML;
 
-$tml = Phrelatorio\OpenDocument::fromString($input);
-    $this->assertEquals($wants, $tml->asXML(['items' => ['A', 'B', 'C']]));
+       $tml = OpenDocumentTester::fromFlatODT($input);
+       $tml->assertContent(['items' => ['A', 'B', 'C']], $wants);
     }
 
     public function testForRow(): void
@@ -102,10 +99,9 @@ XML;
 
 XML;
 
-$tml = Phrelatorio\OpenDocument::fromString($input);
-    $this->assertEquals($wants, $tml->asXML(['items' => ['A', 'B', 'C']]));
+       $tml = OpenDocumentTester::fromFlatODT($input);
+       $tml->assertContent(['items' => ['A', 'B', 'C']], $wants);
     }
-
 
     public function testRepeatRowAndRepeatColumnConsecutive(): void
     {
@@ -179,8 +175,8 @@ XML;
 
 XML;
 
-$tml = Phrelatorio\OpenDocument::fromString($input);
-    $this->assertEquals($wants, $tml->asXML(['items' => ['A', 'B', 'C']]));
+       $tml = OpenDocumentTester::fromFlatODT($input);
+       $tml->assertContent(['items' => ['A', 'B', 'C']], $wants);
     }
 
     public function testConditionalRow(): void
@@ -228,7 +224,16 @@ XML;
 
 XML;
 
-        $tml = Phrelatorio\OpenDocument::fromString($input);
-        $this->assertEquals($wants, $tml->asXML(['show' => false]));
+        $tml = OpenDocumentTester::fromFlatODT($input);
+        $tml->assertContent(['show' => false], $wants);
+    }
+}
+
+
+class OpenDocumentTester extends \Phrelatorio\OpenDocument
+{
+    public function assertContent(array $context, string $wants): void
+    {
+        \PHPUnit\Framework\Assert::assertEquals($wants, $this->asXML($context));
     }
 }
