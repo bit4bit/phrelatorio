@@ -46,8 +46,10 @@ XML;
 
 XML;
 
-       $tml = OpenDocumentTester::fromFlatODT($input);
-       $tml->assertContent(['items' => ['A', 'B', 'C']], $wants);
+        $this->assertEquals(
+            $wants,
+            $this->renderTemplate($input, ['items' => ['A', 'B', 'C']])
+        );
     }
 
     public function testForRow(): void
@@ -99,8 +101,10 @@ XML;
 
 XML;
 
-       $tml = OpenDocumentTester::fromFlatODT($input);
-       $tml->assertContent(['items' => ['A', 'B', 'C']], $wants);
+        $this->assertEquals(
+            $wants,
+            $this->renderTemplate($input, ['items' => ['A', 'B', 'C']])
+        );
     }
 
     public function testRepeatRowAndRepeatColumnConsecutive(): void
@@ -175,8 +179,10 @@ XML;
 
 XML;
 
-       $tml = OpenDocumentTester::fromFlatODT($input);
-       $tml->assertContent(['items' => ['A', 'B', 'C']], $wants);
+        $this->assertEquals(
+            $wants,
+            $this->renderTemplate($input, ['items' => ['A', 'B', 'C']])
+        );
     }
 
     public function testConditionalRow(): void
@@ -224,16 +230,16 @@ XML;
 
 XML;
 
-        $tml = OpenDocumentTester::fromFlatODT($input);
-        $tml->assertContent(['show' => false], $wants);
+        $this->assertEquals(
+            $wants,
+            $this->renderTemplate($input, ['show' => false])
+        );
     }
-}
 
 
-class OpenDocumentTester extends \Phrelatorio\OpenDocument
-{
-    public function assertContent(array $context, string $wants): void
+    private function renderTemplate(string $input, array $context): string
     {
-        \PHPUnit\Framework\Assert::assertEquals($wants, $this->asXML($context));
+        $tml = \Phrelatorio\OpenDocument\Template::fromString($input);
+        return $tml->execute($context);
     }
 }
