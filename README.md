@@ -19,7 +19,7 @@ $doc->save('mynewods.fods', ...context...);
 
 # Todo
 
-- [ ] allow php expressions
+- [x] allow php expressions
 - [ ] inject images
 - [ ] work with .odt and .ods
 
