@@ -67,7 +67,7 @@ class Template
     }
 
     private function extractTal($elem) {
-        $href = urldecode($elem->element()->getAttribute('xlink:href'));
+        $href = rawurldecode($elem->element()->getAttribute('xlink:href'));
         if (preg_match('|phrelatorio://(?<talOpened>/?)(?<talAction>[^ ]+) *(?<talArgument>.*)?$|', $href, $matchs) != 1) {
             throw new \Exception("invalid href ${href}: {$elem}");
         }

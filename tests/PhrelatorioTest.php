@@ -236,6 +236,41 @@ XML;
         );
     }
 
+    public function testPHPExpresion(): void
+    {
+            $input = <<<XML
+<?xml version="1.0"?>
+<document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
+<table:table>
+<table:table-row>
+<table:table-cell>
+    <text:p><text:a xlink:href="phrelatorio://content%20php:%20a%20+%20b">a + b</text:a></text:p>
+</table:table-cell>
+</table:table-row>
+</table:table>
+</document>
+
+XML;
+
+        $wants = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <table:table>
+    <table:table-row>
+      <table:table-cell>
+        <text:p>5</text:p>
+      </table:table-cell>
+    </table:table-row>
+  </table:table>
+</document>
+
+XML;
+
+        $this->assertEquals(
+            $wants,
+            $this->renderTemplate($input, ['a' => 2, 'b' => 3])
+        );
+    }
 
     private function renderTemplate(string $input, array $context): string
     {
