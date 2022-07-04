@@ -272,6 +272,27 @@ XML;
         );
     }
 
+    public function testNothingIfNotHaveTemplateElements(): void
+    {
+        $input = <<<XML
+<?xml version="1.0" encoding="UTF-8"?>
+<document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
+  <table:table>
+    <table:table-row>
+      <table:table-cell>
+      </table:table-cell>
+    </table:table-row>
+  </table:table>
+</document>
+
+XML;
+
+        $this->assertEquals(
+            $input,
+            $this->renderTemplate($input, [])
+        );
+    }
+
     private function renderTemplate(string $input, array $context): string
     {
         $tml = \Phrelatorio\OpenDocument\Template::fromString($input);
