@@ -4,7 +4,10 @@ namespace PhrelatorioTest;
 
 class PhrelatorioTest extends \PHPUnit\Framework\TestCase
 {
-    public function testForColumn(): void
+    /**
+     * @test
+     */
+    public function repeat_column(): void
     {
         $input = <<<XML
 <?xml version="1.0"?>
@@ -52,7 +55,10 @@ XML;
         );
     }
 
-    public function testForRow(): void
+    /**
+     * @test
+     */
+    public function repeat_row(): void
     {
         $input = <<<XML
 <?xml version="1.0"?>
@@ -107,7 +113,10 @@ XML;
         );
     }
 
-    public function testRepeatRowAndRepeatColumnConsecutive(): void
+    /**
+     * @test
+     */
+    public function repeat_row_with_repeat_nested_column(): void
     {
         $input = <<<XML
 <?xml version="1.0"?>
@@ -185,7 +194,10 @@ XML;
         );
     }
 
-    public function testConditionalRow(): void
+    /**
+     * @test
+     */
+    public function conditional_row(): void
     {
         $input = <<<XML
 <?xml version="1.0"?>
@@ -236,7 +248,10 @@ XML;
         );
     }
 
-    public function testPHPExpresion(): void
+    /**
+     * @test
+     */
+    public function execute_PHP_Expression(): void
     {
             $input = <<<XML
 <?xml version="1.0"?>
@@ -272,7 +287,10 @@ XML;
         );
     }
 
-    public function testNothingIfNotHaveTemplateElements(): void
+    /**
+     * @test
+     */
+    public function do_nothing_if_not_have_template_elements(): void
     {
         $input = <<<XML
 <?xml version="1.0" encoding="UTF-8"?>
