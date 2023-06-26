@@ -7,6 +7,53 @@ class PhrelatorioTest extends \PHPUnit\Framework\TestCase
     /**
      * @test
      */
+    public function on_unopened_blockes_raises_exception(): void
+    {
+        $input = <<<XML
+<?xml version="1.0"?>
+<document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
+<table:table>
+<table:table-row>
+<table:table-cell>
+                           <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
+</table:table-cell>
+<table:table-cell>
+                           <text:p><text:a xlink:href="phrelatorio:///condition%20item%20items">for "item items"</text:a></text:p>
+</table:table-cell>
+</table:table-row>
+</table:table>
+</document>
+XML;
+
+        $this->expectException(\Exception::class);
+        $this->renderTemplate($input, ['items' => ['A', 'B', 'C']]);
+    }
+
+    /**
+     * @test
+     */
+    public function on_unbalanced_blocks_raises_exception(): void
+    {
+        $input = <<<XML
+<?xml version="1.0"?>
+<document xmlns="http://test" xmlns:table="urn:oasis:names:tc:opendocument:xmlns:table:1.0" xmlns:text="urn:oasis:names:tc:opendocument:xmlns:text:1.0" xmlns:xlink="http://www.w3.org/1999/xlink">
+<table:table>
+<table:table-row>
+<table:table-cell>
+                           <text:p><text:a xlink:href="phrelatorio://repeat%20item%20items">for "item items"</text:a></text:p>
+</table:table-cell>
+</table:table-row>
+</table:table>
+</document>
+XML;
+
+        $this->expectException(\Exception::class);
+        $this->renderTemplate($input, ['items' => ['A', 'B', 'C']]);
+    }
+
+    /**
+     * @test
+     */
     public function repeat_column(): void
     {
         $input = <<<XML

@@ -68,35 +68,34 @@ class Template
 
     private function extractTal($elem) {
         $href = rawurldecode($elem->element()->getAttribute('xlink:href'));
-        if (preg_match('|phrelatorio://(?<talOpened>/?)(?<talAction>[^ ]+) *(?<talArgument>.*)?$|', $href, $matchs) != 1) {
+        if (preg_match('|phrelatorio://(?<talOpen>/?)(?<talAction>[^ ]+) *(?<talArgument>.*)?$|', $href, $matchs) != 1) {
             throw new \Exception("invalid href ${href}: {$elem}");
         }
 
         $talAction = $matchs['talAction'];
         $talArgument = @$matchs['talArgument'];
-        $talOpened = @$matchs['talOpened'] != '/';
-        return [$talOpened, $talAction, $talArgument];
+        $talOpen = @$matchs['talOpen'] != '/';
+        return [$talOpen, $talAction, $talArgument];
     }
     
     private function talTransform()
     {
-        $elements = $this->doc->getAll('//text:a[starts-with(@*["href"=local-name()], "phrelatorio://")]');
+        $phrelatorioElements = $this->doc->getAll('//text:a[starts-with(@*["href"=local-name()], "phrelatorio://")]');
 
         // argumentos para uso posterior
-        $talArguments = [];
         $beginsBlock = [];
         $blocks = []; # begin => end
 
         // construimos la relacion begin => end,
         // usando beginsBlock como una pila
-        foreach ($elements as $elem) {
-            [$talOpened, $talAction, $talArgument] = $this->extractTal($elem);
-            
+        foreach ($phrelatorioElements as $elem) {
+            [$talOpen, $talAction, $talArgument] = $this->extractTal($elem);
+
+            // /table:table-cell/text:p/text:a
             $cell = $elem->parent()->parent();
-            $talArguments[spl_object_hash($cell)] = $talArgument;
 
             if (in_array($talAction, self::PHPTAL_INLINE)) {
-                $inTable = $elem->parent()->parent()->element()->localName == 'table-cell';
+                $inTable = $cell->element()->localName == 'table-cell';
 
                 if ($inTable) {
                     $elem->parent()->element()->setAttribute("tal:{$talAction}", $talArgument);
@@ -106,30 +105,37 @@ class Template
                     $span->element()->setAttribute("tal:{$talAction}", $talArgument);
                     $elem->parent()->element()->insertBefore($span->element(), $elem->element());
                 }
-
-                $elem->remove();
             } else if (in_array($talAction, self::PHPTAL_ENABLE_BLOCKS)) {
-                if ($talOpened) {
-                    \array_push($beginsBlock, $cell);
+                if ($talOpen) {
+                    \array_push($beginsBlock, [$cell, $talAction, $talArgument]);
                 } else {
-                    $beginBlock = \array_pop($beginsBlock);
+                    [$beginBlock, $beginTalAction, $beginTalArgument] = \array_pop($beginsBlock);
                     $endBlock = $cell;
+
+                    if ($beginTalAction != $talAction) {
+                        throw new \Exception("closed unopened ${talAction}");
+                    }
+
                     $commonAncestor = $this->lowestCommonAncestor($beginBlock, $endBlock);
                     if ($commonAncestor === null) {
                         throw new \Exception("can't detect common parent");
                     }
-                    $blocks[] = [$talAction, $commonAncestor, $beginBlock, $endBlock];
+                    $blocks[] = [$beginTalAction, $beginTalArgument, $commonAncestor, $beginBlock, $endBlock];
                 }
             }
 
+            // xlink:href
             $elem->remove();
         }
 
+        if (count($beginsBlock)) {
+            throw new \Exception("unbalanced blocks");
+        }
+
         foreach($blocks as $match) {
-            [$talAction, $commonAncestor, $beginBlock, $endBlock] = $match;
+            [$talAction, $talArgument, $commonAncestor, $beginBlock, $endBlock] = $match;
             $commonAncestorTag = $commonAncestor->element()->localName;
             $sectionToRepeat = ['table-row' => 'column', 'table' => 'row', 'spreadsheet' => 'table'][$commonAncestorTag];
-            $talArgument = $talArguments[spl_object_hash($beginBlock)];
 
             switch($sectionToRepeat) {
             case 'column':
@@ -187,11 +193,6 @@ class Template
             $parentDom->appendChild($fromBeginNextSibling);
             $fromBeginNextSibling = $beginDom->nextSibling;
         }
-    }
-
-    private function objectHash(&$obj): string
-    {
-        return spl_object_hash($obj);
     }
 
     private function lowestCommonAncestor($beginFor, $endFor) {
