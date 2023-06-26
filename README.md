@@ -23,6 +23,13 @@ $doc->save('mynewods.fods', ...context...);
 - [ ] inject images
 - [ ] work with .odt and .ods
 
+# Contributing
+
+1. `rake dev:up`
+2. `rake dev:init`
+3. `rake tdd`
+4. `rake dev:down`
+
 # Thanks
 
 * [PHPTAL](https://phptal.org/)
