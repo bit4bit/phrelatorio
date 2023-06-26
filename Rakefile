@@ -11,10 +11,17 @@ def compose(*args)
 end
 
 namespace :dev do
+  desc 'up environment'
   task :up do
     compose 'up', '-d --build'
   end
 
+  desc 'initialize environment'
+  task :init do
+    compose 'exec', $alias_container['main'], 'composer install'
+  end
+
+  desc 'down environment'
   task :down do
     compose 'down', '-v'
   end
@@ -47,4 +54,9 @@ namespace :dev do
   task :sql, :database do |_, args|
     compose 'exec', 'db psql -U postgres', args.database
   end
+end
+
+desc 'tdd'
+task :tdd do
+  compose 'exec', $alias_container['main'], 'bash -c "composer run commit"'
 end
